@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Image to Text Scanner</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f4f4f4;
+      margin-top: 50px;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 18px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #output {
+      margin-top: 20px;
+      white-space: pre-line;
+      font-size: 16px;
+      background: white;
+      display: inline-block;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      width: 60%;
+    }
+  </style>
+</head>
+<body>
+  <h1>📷 Image to Text OCR Scanner</h1>
+  <button onclick="capture()">Scan Now</button>
+  <div id="output">Click the button to capture and extract text.</div>
+
+  <script>
+    async function capture() {
+      document.getElementById('output').innerText = "Scanning...";
+      let response = await fetch('/capture');
+      let data = await response.json();
+      if (data.error) {
+        document.getElementById('output').innerText = "Error: " + data.error;
+      } else {
+        document.getElementById('output').innerText = data.text || "No text detected.";
+      }
+    }
+  </script>
+</body>
+</html>

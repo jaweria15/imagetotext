@@ -1,35 +1,36 @@
+from flask import Flask, render_template, jsonify
 import cv2
-import pytesseract
 from PIL import Image
+import pytesseract
+import os
 
-# Optional: if Tesseract is not in PATH, uncomment this
+app = Flask(__name__)
+
+
+# optional: set path of tesseract.exe if needed
 # pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
-cap = cv2.VideoCapture(0)
-print("Press 's' to scan image...")
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-while True:
+
+@app.route('/capture')
+def capture_image():
+    cap = cv2.VideoCapture(0)
     ret, frame = cap.read()
     if not ret:
-        print("Camera not detected!")
-        break
+        cap.release()
+        return jsonify({'error': 'Camera not detected'})
 
-    cv2.imshow("Camera", frame)
+    img_path = os.path.join('static', 'captured_image.jpg')
+    cv2.imwrite(img_path, frame)
+    cap.release()
 
-    # Step 2: 's' key press par image capture
-    if cv2.waitKey(1) & 0xFF == ord('s'):
-        cv2.imwrite("captured_image.jpg", frame)
-        print("Image captured successfully!")
-        break
+    img = Image.open(img_path)
+    text = pytesseract.image_to_string(img)
+    return jsonify({'text': text})
 
-# Step 3: Camera band karo
-cap.release()
-cv2.destroyAllWindows()
 
-# Step 4: OCR - Image se text extract karo
-img = Image.open("captured_image.jpg")
-text = pytesseract.image_to_string(img)
-
-# Step 5: Output show karo
-print("\n--- Extracted Text ---\n")
-print(text)
+if __name__ == '__main__':
+    app.run(debug=True)
